@@ -151,6 +151,9 @@ const resolvers = {
   },
   Mutation: {
     addBook: (root, args) => {
+      if (!(args.title && args.author && args.published)) {
+        throw new Error('All fields are required')
+      }
       if (!authors.some(author => author.name === args.author)) {
         const author = {name: args.author, id: uuid()}
         authors = authors.concat(author)
