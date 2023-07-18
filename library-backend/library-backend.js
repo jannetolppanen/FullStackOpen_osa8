@@ -97,7 +97,7 @@ type Book {
   published: Int!
   author: String!
   id: ID!
-  genres: [String!]
+  genres: [String]
 }
 
 type Author {
