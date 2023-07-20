@@ -1,6 +1,13 @@
 const { ApolloServer } = require('@apollo/server')
 const { startStandaloneServer } = require('@apollo/server/standalone')
 const { v1: uuid } = require('uuid')
+const mongoose = require('mongoose')
+mongoose.set('strictQuery', false)
+
+const Author = require('./models/author')
+const Book = require('./models/book')
+
+require('dotenv').config()
 
 let authors = [
   {
@@ -27,13 +34,6 @@ let authors = [
     id: 'afa5b6f3-344d-11e9-a414-719c6709cf3e',
   },
 ]
-
-/*
- * Suomi:
- * Saattaisi olla järkevämpää assosioida kirja ja sen tekijä tallettamalla kirjan yhteyteen tekijän nimen sijaan tekijän id
- * Yksinkertaisuuden vuoksi tallennamme kuitenkin kirjan yhteyteen tekijän nimen
- *
- */
 
 let books = [
   {
@@ -87,17 +87,25 @@ let books = [
   },
 ]
 
-/*
-  you can remove the placeholder query once your first own has been implemented 
-*/
+const MONGODB_URI = process.env.MONGODB_URI
+
+console.log('connecting to', MONGODB_URI)
+
+mongoose.connect(MONGODB_URI)
+  .then(() => {
+    console.log('connected to MongoDB')
+  })
+  .catch((error) => {
+    console.log('error connection to MongoDB:', error.message)
+  })
 
 const typeDefs = `
 type Book {
   title: String!
   published: Int!
-  author: String!
+  author: Author!
+  genres: [String!]!
   id: ID!
-  genres: [String]
 }
 
 type Author {
@@ -150,17 +158,37 @@ const resolvers = {
     },
   },
   Mutation: {
-    addBook: (root, args) => {
-      if (!(args.title && args.author && args.published)) {
-        throw new Error('All fields are required')
+    addBook: async (root, args) => {
+      const knownAuthor = await Author.findOne({ name: args.author })
+      if (!knownAuthor){
+        const author = new Author( { name: args.author})
+
+        try {
+          await author.save()
+        } catch (error) {
+          console.log(error)
+        }
       }
-      if (!authors.some(author => author.name === args.author)) {
-        const author = {name: args.author, id: uuid()}
-        authors = authors.concat(author)
+
+      const existingAuthor = await Author.findOne({ name: args.author })
+      const book = new Book({ ...args, author: existingAuthor})
+
+      try {
+        const response = await book.save()
+        return response
+      } catch (error) {
+        console.log(err1or)
       }
-      const book = {...args, id: uuid()}
-      books = books.concat(book)
-      return book
+      // if (!(args.title && args.author && args.published)) {
+      //   throw new Error('All fields are required')
+      // }
+      // if (!authors.some(author => author.name === args.author)) {
+      //   const author = {name: args.author, id: uuid()}
+      //   authors = authors.concat(author)
+      // }
+      // const book = {...args, id: uuid()}
+      // books = books.concat(book)
+      // return book
     },
     editAuthor: (root, args) => {
       if (authors.some(author => author.name === args.name)) {
