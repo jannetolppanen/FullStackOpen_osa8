@@ -138,23 +138,33 @@ type Author {
 
 const resolvers = {
   Query: {
-    bookCount: () => books.length,
-    authorCount: () => authors.length,
-    allAuthors: () => authors,
-    allBooks: (root, args) => {
-      let result = books
+    bookCount: async () => {
+      const books = await Book.find({})
+      return books.length      
+    },
+    authorCount: async () => {
+      const authors = await Author.find({})
+      return authors.length      
+    },
+    allAuthors: async () => {
+      const authors = await Author.find({})
+      return authors
+    },
+    allBooks: async (root, args) => {
+      let result = await Book.find({}).populate('author', 'name id born bookCount')
       if (args.author) {
-        result = books.filter((book) => book.author === args.author)
+        result = result.filter(book => book.author.name === args.author)
       }
       if (args.genre) {
-        result = result.filter((book) => book.genres.includes(args.genre))
+        result = result.filter(book => book.genres.includes(args.genre))
       }
       return result
     },
   },
   Author: {
-    bookCount: (author) => {
-      return books.filter((book) => book.author === author.name).length
+    bookCount: async (root) => {
+      booksByAuthor = await Book.find({ author: root.id})
+      return booksByAuthor.length
     },
   },
   Mutation: {
@@ -177,30 +187,19 @@ const resolvers = {
         const response = await book.save()
         return response
       } catch (error) {
-        console.log(err1or)
+        console.log(error)
       }
-      // if (!(args.title && args.author && args.published)) {
-      //   throw new Error('All fields are required')
-      // }
-      // if (!authors.some(author => author.name === args.author)) {
-      //   const author = {name: args.author, id: uuid()}
-      //   authors = authors.concat(author)
-      // }
-      // const book = {...args, id: uuid()}
-      // books = books.concat(book)
-      // return book
     },
-    editAuthor: (root, args) => {
-      if (authors.some(author => author.name === args.name)) {
-        authors = authors.map(author =>
-          author.name === args.name
-          ? {...author, born: args.setBornTo}
-          : author
-          )
-          const updatedAuthor = authors.find(author => author.name === args.name)
-          return updatedAuthor
+    editAuthor: async (root, args) => {
+      const filter = { name : args.name }
+      const update = { born : args.setBornTo }
+      try {
+        const updatedAuthor = await Author.findOneAndUpdate(filter, update, { new: true })
+        console.log(updatedAuthor)
+        return updatedAuthor
+      } catch (error) {
+        throw new Error(`${args.name} not found!`)
       }
-      return null
     }
   }
 }
