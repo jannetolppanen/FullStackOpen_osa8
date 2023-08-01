@@ -1,5 +1,6 @@
 import Authors from './components/Authors'
 import Books from './components/Books'
+import LoginPage from './components/LoginPage'
 import NewBook from './components/NewBook'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 
@@ -25,6 +26,10 @@ const App = () => {
         <Link style={style} to='/add'>
           add book
         </Link>
+        <Link style={style} to='/login'>
+          login
+        </Link>
+        <button>logout</button>
       </div>
 
       <Routes>
@@ -32,6 +37,7 @@ const App = () => {
         <Route path='authors' element={<Authors />} />
         <Route path='books' element={<Books />} />
         <Route path='add' element={<NewBook />} />
+        <Route path='login' element={<LoginPage />} />
       </Routes>
     </Router>
   )

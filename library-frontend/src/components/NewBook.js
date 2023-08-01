@@ -43,6 +43,7 @@ const NewBook = (props) => {
 
   return (
     <div style={style}>
+      <h2>add book</h2>
       <form onSubmit={submit}>
         <div>
           title
