@@ -4,9 +4,11 @@ const { v1: uuid } = require('uuid')
 const mongoose = require('mongoose')
 mongoose.set('strictQuery', false)
 const { GraphQLError } = require('graphql')
+const jwt = require('jsonwebtoken')
 
 const Author = require('./models/author')
 const Book = require('./models/book')
+const User = require('./models/user')
 
 require('dotenv').config()
 
@@ -102,6 +104,15 @@ mongoose
   })
 
 const typeDefs = `
+type User {
+  username: String!
+  favoriteGenre: String!
+  id: ID!
+}
+
+type Token {
+  value: String!
+}
 type Book {
   title: String!
   published: Int!
@@ -122,6 +133,7 @@ type Author {
     authorCount: Int!
     allBooks(author:String, genre:String): [Book!]
     allAuthors: [Author!]
+    me: User
   }
 
   type Mutation {
@@ -135,6 +147,14 @@ type Author {
       name: String!
       setBornTo: Int!
     ): Author
+    createUser(
+      username: String!
+      favoriteGenre: String!
+    ): User
+    login(
+      username: String!
+      password: String!
+    ): Token
   }
 `
 
@@ -173,6 +193,38 @@ const resolvers = {
     },
   },
   Mutation: {
+    createUser: async (root, args) => {
+      const user = new User({ username: args.username, favoriteGenre: args.favoriteGenre })
+  
+      return user.save()
+        .catch(error => {
+          throw new GraphQLError('Creating the user failed', {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+              invalidArgs: args.name,
+              error
+            }
+          })
+        })
+    },
+    login: async (root, args) => {
+      const user = await User.findOne({ username: args.username })
+  
+      if ( !user || args.password !== 'secret' ) {
+        throw new GraphQLError('wrong credentials', {
+          extensions: {
+            code: 'BAD_USER_INPUT'
+          }
+        })        
+      }
+  
+      const userForToken = {
+        username: user.username,
+        id: user._id,
+      }
+  
+      return { value: jwt.sign(userForToken, process.env.JWT_SECRET) }
+    },
     addBook: async (root, args) => {
       if (args.author.length < 4) {
         throw new GraphQLError('Author name must be atleast 4 letters', {
@@ -199,7 +251,7 @@ const resolvers = {
         } catch (error) {
           throw new GraphQLError('Could not save new author', {
             extensions: {
-              code: 'INTERNAL_SERVER_ERROR'
+              code: 'INTERNAL_SERVER_ERROR',
             },
           })
         }
@@ -213,14 +265,13 @@ const resolvers = {
         throw new GraphQLError('Could not save new book', {
           extensions: {
             code: 'INTERNAL_SERVER_ERROR',
-            error
-          }
+            error,
+          },
         })
       }
       return book
     },
     editAuthor: async (root, args) => {
-
       const author = await Author.findOne({ name: args.name })
       if (!author) {
         console.log('triggered')
@@ -228,7 +279,7 @@ const resolvers = {
           extensions: {
             code: 'BAD_USER_INPUT',
             invalidArgs: args.name,
-          }
+          },
         })
       }
       author.born = args.setBornTo
@@ -239,8 +290,8 @@ const resolvers = {
         throw new GraphQLError('Could not edit birthyeard', {
           extensions: {
             code: 'INTERNAL_SERVER_ERROR',
-            error
-          }
+            error,
+          },
         })
       }
       return author
