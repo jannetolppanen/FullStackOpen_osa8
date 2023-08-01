@@ -230,7 +230,15 @@ const resolvers = {
 
       return { value: jwt.sign(userForToken, process.env.JWT_SECRET) }
     },
-    addBook: async (root, args) => {
+    addBook: async (root, args, context) => {
+      const currentUser = context.currentUser
+      if (!currentUser) {
+        throw new GraphQLError('not authenticated', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+          }
+        })
+      }
       if (args.author.length < 4) {
         throw new GraphQLError('Author name must be atleast 4 letters', {
           extensions: {
@@ -276,7 +284,15 @@ const resolvers = {
       }
       return book
     },
-    editAuthor: async (root, args) => {
+    editAuthor: async (root, args, context) => {
+      const currentUser = context.currentUser
+      if (!currentUser) {
+        throw new GraphQLError('not authenticated', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+          }
+        })
+      }
       const author = await Author.findOne({ name: args.name })
       if (!author) {
         console.log('triggered')
@@ -316,7 +332,6 @@ startStandaloneServer(server, {
     if (auth && auth.startsWith('Bearer ')) {
       const decodedToken = jwt.verify(auth.substring(7), process.env.JWT_SECRET)
       const currentUser = await User.findById(decodedToken.id)
-      console.log(currentUser)
       return { currentUser }
     }
   },
