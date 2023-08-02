@@ -3,15 +3,15 @@ import { useMutation, useQuery } from '@apollo/client'
 import { useState } from 'react'
 import Select from 'react-select'
 
-const Authors = () => {
+const Authors = ({ token }) => {
   const [name, setName] = useState('')
   const [born, setBorn] = useState('')
 
   const customStyles = {
     control: (provided) => ({
       ...provided,
-      width: "250px"
-    })
+      width: '250px',
+    }),
   }
 
   const result = useQuery(ALL_AUTHORS)
@@ -65,20 +65,26 @@ const Authors = () => {
           ))}
         </tbody>
       </table>
-      <h2>set birthyear</h2>
 
-      <form onSubmit={submit}>
-        <Select styles={customStyles} options={authorOptions} onChange={handleNameChange} />
-
-        <div>
-          born
-          <input
-            value={born}
-            onChange={({ target }) => setBorn(parseInt(target.value))}
+{token && (      <>
+        <h2>set birthyear</h2>
+        <form onSubmit={submit}>
+          <Select
+            styles={customStyles}
+            options={authorOptions}
+            onChange={handleNameChange}
           />
-        </div>
-        <button type='submit'>update author</button>
-      </form>
+
+          <div>
+            born
+            <input
+              value={born}
+              onChange={({ target }) => setBorn(parseInt(target.value))}
+            />
+          </div>
+          <button type='submit'>update author</button>
+        </form>
+      </>)}
     </div>
   )
 }

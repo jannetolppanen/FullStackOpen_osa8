@@ -33,12 +33,14 @@ const App = () => {
         <Link style={style} to='/authors'>
           <button>authors</button>
         </Link>
+
         <Link style={style} to='/books'>
           <button>books</button>
         </Link>
-        <Link style={style} to='/add'>
+        
+        {token ? (<Link style={style} to='/add'>
           <button>add book</button>
-        </Link>
+        </Link>) : null}
 
         {token ? (
           <Link>
@@ -53,7 +55,7 @@ const App = () => {
 
       <Routes>
         <Route path='*' element={<Authors />} />
-        <Route path='authors' element={<Authors />} />
+        <Route path='authors' element={<Authors token={token} />} />
         <Route path='books' element={<Books />} />
         <Route path='add' element={<NewBook />} />
         <Route path='login' element={<LoginPage setToken={setToken} />} />

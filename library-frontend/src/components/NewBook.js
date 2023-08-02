@@ -23,8 +23,8 @@ const NewBook = (props) => {
     addBook({
       variables: {
         title,
-        author,
         published,
+        author,
         genres,
       },
     })
