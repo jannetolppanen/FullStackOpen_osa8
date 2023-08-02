@@ -9,7 +9,6 @@ const Books = () => {
     return <div>loading...</div>
   }
 
-  console.log(result.data.allBooks)
   return (
     <div>
       <h2>books</h2>

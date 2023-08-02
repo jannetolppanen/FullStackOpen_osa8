@@ -3,33 +3,42 @@ import Books from './components/Books'
 import LoginPage from './components/LoginPage'
 import NewBook from './components/NewBook'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import { useState } from 'react'
+import { useApolloClient } from '@apollo/client'
 
 const App = () => {
+  const client = useApolloClient()
+  const [token, setToken] = useState(null)
   const style = {
-    padding: "10px 20px",
-    margin: "4px",
-    backgroundColor: "#99bfb7"
+    margin: '4px',
   }
 
-
+  const logout = () => {
+    setToken(null)
+    localStorage.clear()
+    client.resetStore()
+  }
+  console.log(token)
 
   return (
     <Router>
-
+      {token ? token : "no token"}
       <div>
         <Link style={style} to='/authors'>
-          authors
+          <button>authors</button>
         </Link>
         <Link style={style} to='/books'>
-          books
+          <button>books</button>
         </Link>
         <Link style={style} to='/add'>
-          add book
+          <button>add book</button>
         </Link>
         <Link style={style} to='/login'>
-          login
+          <button>login</button>
         </Link>
-        <button>logout</button>
+        <Link>
+          <button onClick={logout}>logout</button>
+        </Link>
       </div>
 
       <Routes>
@@ -37,7 +46,7 @@ const App = () => {
         <Route path='authors' element={<Authors />} />
         <Route path='books' element={<Books />} />
         <Route path='add' element={<NewBook />} />
-        <Route path='login' element={<LoginPage />} />
+        <Route path='login' element={<LoginPage setToken={setToken} />} />
       </Routes>
     </Router>
   )
