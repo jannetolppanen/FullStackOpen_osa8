@@ -3,7 +3,7 @@ import Books from './components/Books'
 import LoginPage from './components/LoginPage'
 import NewBook from './components/NewBook'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useApolloClient } from '@apollo/client'
 
 const App = () => {
@@ -13,16 +13,22 @@ const App = () => {
     margin: '4px',
   }
 
+  // Check localstorage for logged in user
+  useEffect(() => {
+    const loggedUser = window.localStorage.getItem('library-user-token')
+    if (loggedUser) {
+      setToken(loggedUser)
+    }
+  },[])
+
   const logout = () => {
     setToken(null)
     localStorage.clear()
     client.resetStore()
   }
-  console.log(token)
 
   return (
     <Router>
-      {token ? token : "no token"}
       <div>
         <Link style={style} to='/authors'>
           <button>authors</button>
@@ -33,12 +39,16 @@ const App = () => {
         <Link style={style} to='/add'>
           <button>add book</button>
         </Link>
-        <Link style={style} to='/login'>
-          <button>login</button>
-        </Link>
-        <Link>
-          <button onClick={logout}>logout</button>
-        </Link>
+
+        {token ? (
+          <Link>
+            <button onClick={logout}>logout</button>
+          </Link>
+        ) : (
+          <Link style={style} to='/login'>
+            <button>login</button>
+          </Link>
+        )}
       </div>
 
       <Routes>

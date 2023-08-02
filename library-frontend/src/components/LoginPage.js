@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useMutation } from '@apollo/client'
 import { LOGIN } from '../queries'
+import { useNavigate } from 'react-router-dom'
 
 const LoginPage = ({ setToken }) => {
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const navigate = useNavigate()
 
   const style = {
     margin: '20px 0px',
@@ -17,7 +19,8 @@ const LoginPage = ({ setToken }) => {
     if ( result.data ) {      
         const token = result.data.login.value      
         setToken(token)      
-        localStorage.setItem('library-user-token', token)    
+        localStorage.setItem('library-user-token', token)
+        navigate('/')
       }  
   }, [result.data])
 
@@ -27,6 +30,7 @@ const LoginPage = ({ setToken }) => {
     
     login({ variables: { username, password } })
   }
+
   return (
     <div style={style}>
       <h2>login</h2>
