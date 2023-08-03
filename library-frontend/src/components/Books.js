@@ -4,10 +4,13 @@ import { useState } from "react"
 const Books = () => {
   const [filter, setFilter] = useState('')
 
-  const result = useQuery(ALL_BOOKS)
+  const result = useQuery(ALL_BOOKS, {
+    fetchPolicy: "no-cache",  // bypass cache when querying
+  })
   
   const books = useQuery(ALL_BOOKS, {
     variables: { genre: filter },
+    fetchPolicy: "no-cache",  // bypass cache when querying
   })
   
   if (result.loading || books.loading)  {
