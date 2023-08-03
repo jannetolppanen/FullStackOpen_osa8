@@ -17,13 +17,13 @@ const LoginPage = ({ setToken }) => {
 
   useEffect(() => {    
     if ( result.data ) {      
-        const token = result.data.login.value      
-        setToken(token)      
-        localStorage.setItem('library-user-token', token)
-        navigate('/')
-      }  
+      const token = result.data.login.value      
+      setToken(token)
+      localStorage.setItem('library-user-token', token)
+      navigate('/')
+    }  
   }, [result.data])
-
+  
 
   const submit = async (event) => {
     event.preventDefault()
