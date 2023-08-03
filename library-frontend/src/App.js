@@ -6,13 +6,12 @@ import Recommendations from './components/Recommendations'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { useApolloClient, useQuery } from '@apollo/client'
-import { LOGGEDIN_USER } from './queries'
-import userEvent from '@testing-library/user-event'
+
 
 const App = () => {
   const client = useApolloClient()
   const [token, setToken] = useState(null)
-  const userDetails = useQuery(LOGGEDIN_USER)
+
   const style = {
     margin: '4px',
   }
@@ -66,7 +65,7 @@ const App = () => {
         <Route path='authors' element={<Authors token={token} />} />
         <Route path='books' element={<Books />} />
         <Route path='add' element={<NewBook />} />
-        <Route path='recommendations' element={<Recommendations userDetails={userDetails} />} />
+        <Route path='recommendations' element={<Recommendations />} />
         <Route path='login' element={<LoginPage setToken={setToken} />} />
       </Routes>
     </Router>
