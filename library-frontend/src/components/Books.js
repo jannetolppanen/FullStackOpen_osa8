@@ -5,20 +5,22 @@ const Books = () => {
   const [filter, setFilter] = useState('')
 
   const result = useQuery(ALL_BOOKS)
-
-
-  if (result.loading)  {
+  
+  const books = useQuery(ALL_BOOKS, {
+    variables: { genre: filter },
+  })
+  
+  if (result.loading || books.loading)  {
     return <div>loading...</div>
   }
   // Create list of genres without duplicates
   const genres = [...new Set(result.data.allBooks.reduce((accumulator, book) => accumulator.concat(book.genres), []))]
 
 // Creates a list of books and filters them if filter is set
-const filteredBooks = filter
-  ? result.data.allBooks.filter((book) => book.genres.includes(filter))
-  : result.data.allBooks
-
-
+// Left this here to show how it was done with frontend
+// const filteredBooks = filter
+//   ? result.data.allBooks.filter((book) => book.genres.includes(filter))
+//   : result.data.allBooks
 
   return (
     <div>
@@ -30,7 +32,7 @@ const filteredBooks = filter
             <th>author</th>
             <th>published</th>
           </tr>
-          {filteredBooks.map((book) => (
+          {books.data.allBooks.map((book) => (
             <tr key={book.title}>
               <td>{book.title}</td>
               <td>{book.author.name}</td>
