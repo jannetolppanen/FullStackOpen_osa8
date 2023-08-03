@@ -1,6 +1,8 @@
 import { ALL_BOOKS } from "../queries"
 import { useQuery } from "@apollo/client"
+import { useState } from "react"
 const Books = () => {
+  const [filter, setFilter] = useState('')
 
   const result = useQuery(ALL_BOOKS)
 
@@ -8,6 +10,15 @@ const Books = () => {
   if (result.loading)  {
     return <div>loading...</div>
   }
+  // Create list of genres without duplicates
+  const genres = [...new Set(result.data.allBooks.reduce((accumulator, book) => accumulator.concat(book.genres), []))]
+
+// Creates a list of books and filters them if filter is set
+const filteredBooks = filter
+  ? result.data.allBooks.filter((book) => book.genres.includes(filter))
+  : result.data.allBooks
+
+
 
   return (
     <div>
@@ -19,7 +30,7 @@ const Books = () => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {result.data.allBooks.map((book) => (
+          {filteredBooks.map((book) => (
             <tr key={book.title}>
               <td>{book.title}</td>
               <td>{book.author.name}</td>
@@ -28,6 +39,10 @@ const Books = () => {
           ))}
         </tbody>
       </table>
+      <button onClick={() => setFilter('')}>all genres</button><br/>
+      {genres.map((genre) => (
+        <button key={genre} onClick={() => setFilter(genre)}>{genre}</button>
+      ))}
     </div>
   )
 }
