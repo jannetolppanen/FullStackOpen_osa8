@@ -51,6 +51,7 @@ const LoginPage = ({ setToken }) => {
         </div>
         <button type='submit'>login</button>
         <p>admin / secret</p>
+        <p>Aleksis Kivi / secret</p>
       </form>
             </div>
   )

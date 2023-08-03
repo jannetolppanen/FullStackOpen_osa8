@@ -28,6 +28,7 @@ const App = () => {
     setToken(null)
     localStorage.clear()
     client.resetStore()
+    window.location = '/' // Redirect to main page
   }
 
   return (
