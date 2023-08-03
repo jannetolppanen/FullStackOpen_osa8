@@ -1,16 +1,16 @@
 import { ALL_BOOKS } from "../queries"
 import { useQuery } from "@apollo/client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 const Books = () => {
   const [filter, setFilter] = useState('')
 
   const result = useQuery(ALL_BOOKS, {
-    fetchPolicy: "no-cache",  // bypass cache when querying
+    pollInterval: 2000,
   })
   
   const books = useQuery(ALL_BOOKS, {
     variables: { genre: filter },
-    fetchPolicy: "no-cache",  // bypass cache when querying
+    pollInterval: 2000,
   })
   
   if (result.loading || books.loading)  {
