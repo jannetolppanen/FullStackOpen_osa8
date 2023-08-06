@@ -56,5 +56,4 @@ type Author {
     bookAdded: Book!
   }    
 `
-
 module.exports = typeDefs
