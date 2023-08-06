@@ -4,6 +4,9 @@ const Author = require('./models/author')
 const Book = require('./models/book')
 const User = require('./models/user')
 
+const { PubSub } = require('graphql-subscriptions')
+const pubsub = new PubSub()
+
 const resolvers = {
   Query: {
     me: (root, args, context) => {
@@ -128,8 +131,10 @@ const resolvers = {
           },
         })
       }
+      pubsub.publish('BOOK_ADDED', { bookAdded: book })
       return book
     },
+
     editAuthor: async (root, args, context) => {
       const currentUser = context.currentUser
       if (!currentUser) {
@@ -162,6 +167,11 @@ const resolvers = {
         })
       }
       return author
+    },
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator('BOOK_ADDED')
     },
   },
 }
